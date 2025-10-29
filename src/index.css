@@ -1,0 +1,549 @@
+/* Estilo geral - Tema escuro Netflix */
+:root {
+  --netflix-red: #9505fb;
+  --netflix-black: #181717;
+  --netflix-dark: #0a0014;
+  --netflix-purple: #8000ff;
+  --netflix-purple-light: #a64dff;
+  --netflix-gray: #2f2f2f;
+  --netflix-text: #ffffff;
+  --netflix-text-secondary: #d4c8e4;
+  --netflix-gradient: linear-gradient(135deg, #4c00ff 0%, #8000ff 50%, #e50914 100%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--netflix-black);
+  font-family: 'Poppins', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: var(--netflix-text);
+  line-height: 1.6;
+}
+
+/* Header estilo Netflix premium */
+header {
+  background: linear-gradient(180deg, rgba(20,20,20,0.9) 0%, transparent 100%);
+  padding: 1.5rem 4%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  transition: background-color 0.3s ease;
+}
+
+header.scrolled {
+  background-color: var(--netflix-black);
+}
+
+.logo {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--netflix-red);
+  text-decoration: none;
+  letter-spacing: -1px;
+}
+
+/* Navegação estilo Netflix */
+.nav-links {
+  display: flex;
+  gap: 1rem;
+  margin-left: 3rem;
+}
+
+.nav-links a {
+  color: var(--netfox-text);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+  color: var(--netflix-text-secondary);
+}
+
+/* Search bar moderna */
+.search-form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+}
+
+.search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+header input {
+  padding: 0.7rem 1.2rem 0.7rem 2.5rem;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  outline: none;
+  font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  color: white;
+  width: 280px;
+  transition: all 0.3s ease;
+}
+
+header input:focus {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--netflix-purple);
+  width: 320px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--netflix-text-secondary);
+  z-index: 1;
+}
+
+header button {
+  background-color: var(--netflix-red);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.7rem 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+}
+
+header button:hover {
+  background-color: #0661f4;
+  transform: translateY(-1px);
+}
+
+/* Container principal com padding para header fixo */
+.container {
+  padding: 8rem 4% 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Seções estilo Netflix */
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--netflix-text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--netflix-red), transparent);
+}
+
+/* Grid de filmes - Carrossel horizontal */
+.movies-grid {
+  display: flex;
+  flex-wrap: wrap;           /* 🔹 Faz os cards quebrarem linha automaticamente */
+  justify-content: center;   /* 🔹 Centraliza os cards */
+  gap: 2px;                 /* 🔹 Espaço entre eles */
+  padding: 20px;
+}
+
+.movies-grid::-webkit-scrollbar {
+  display: none;
+}
+
+/* Card do filme aprimorado */
+.movie-card {
+  position: relative;
+  background: var(--netflix-gray);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
+  /*flex: 0 0 auto;*/
+  width: 300px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+
+  width: 200px;
+  flex: 1 1 200px;   /* 🔹 Faz o card se ajustar mantendo largura mínima */
+  max-width: 200px;
+}
+
+.movie-card:hover {
+  transform: scale(1.08);
+  box-shadow: 0 10px 25px rgba(128, 0, 255, 0.4);
+  z-index: 10;
+}
+
+/* Efeito de brilho no hover */
+.movie-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 30%, rgba(128, 0, 255, 0.1) 50%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+  
+}
+
+.movie-card:hover::before {
+  opacity: 1;
+}
+
+/* Pôster com overlay */
+.movie-card img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.movie-card:hover img {
+  transform: scale(1.05);
+}
+
+/* Overlay de informações */
+.movie-card .info-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+  padding: 1.5rem 1rem 1rem;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+
+.movie-card:hover .info-overlay {
+  transform: translateY(0);
+}
+
+.movie-card h3 {
+  padding: 5px 15px 0 15px;
+  font-size: 0.85rem;
+  margin: 0 0 0.5rem 0;
+  color: #fff;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.movie-card p {
+  padding-left: 15px;
+  padding-bottom: 15px;
+  font-size: 0.8rem;
+  color: var(--netflix-text-secondary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Botão de favorito melhorado */
+.fav-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+  z-index: 2;
+}
+
+.fav-btn:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: scale(1.15);
+}
+
+.fav-btn.fav {
+  color: var(--netflix-red);
+  background: rgba(229, 9, 20, 0.9);
+}
+
+/* Página de detalhes premium */
+.details {
+  padding: 8rem 4% 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--netflix-text-secondary);
+  font-weight: 500;
+  margin-bottom: 2rem;
+  transition: color 0.3s ease;
+}
+
+.back-btn:hover {
+  color: var(--netflix-text);
+}
+
+.details-hero {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.details-hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(20,20,20,0.9) 0%, transparent 50%, rgba(128,0,255,0.1) 100%);
+  z-index: 1;
+}
+
+.details-content {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 3rem;
+  align-items: start;
+}
+
+.details-poster {
+  position: relative;
+  z-index: 2;
+}
+
+.details-poster img {
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+.details-info {
+  position: relative;
+  z-index: 2;
+}
+
+.details-info h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  background: var(--netflix-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.movie-meta {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.9rem;
+  color: var(--netflix-text-secondary);
+}
+
+.rating {
+  color: #ffd700;
+}
+
+.details-info p {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--netflix-text-secondary);
+  margin-bottom: 2rem;
+}
+
+.details-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.details .fav-btn {
+  position: static;
+  background-color: var(--netflix-red);
+  border-radius: 4px;
+  padding: 0.8rem 1.5rem;
+  color: white;
+  font-weight: 600;
+  border: none;
+  width: auto;
+  height: auto;
+  font-size: 0.9rem;
+}
+
+.details .fav-btn:hover {
+  background-color: #f40612;
+  transform: translateY(-2px);
+}
+
+/* Loader estilo Netflix */
+.loader {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--netflix-red);
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsivo aprimorado */
+@media (max-width: 1024px) {
+
+  .movies-grid {
+  max-width: 1024px;
+  display: flex;
+  flex-wrap: wrap;           /* 🔹 Faz os cards quebrarem linha automaticamente */
+  justify-content: center;   /* 🔹 Centraliza os cards */
+  gap: 10px;                 /* 🔹 Espaço entre eles */
+  padding: 20px;
+}
+
+  .details-content {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    text-align: center;
+  }
+  
+  .details-poster {
+    min-width: 200px;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 768px) {
+
+  .logo {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--netflix-red);
+  text-decoration: none;
+  letter-spacing: -1px;
+  text-align: center;
+  padding: 0 5px 0 5px;
+}
+
+  header {
+    padding: 1rem 2%;
+    
+  }
+  
+  .nav-links {
+    display: none;
+  }
+  
+  header input {
+    width: 200px;
+  }
+  
+  header input:focus {
+    width: 250px;
+  }
+  
+  .container {
+    padding: 6rem 4% 2rem;
+  }
+  
+  .movie-card {
+    width: 160px;
+  }
+  
+  .movie-card img {
+    height: 240px;
+  }
+}
+
+@media (max-width: 480px) {
+
+  .logo {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--netflix-red);
+  text-decoration: none;
+  letter-spacing: -1px;
+  text-align: center;
+  padding: 0 5px 0 5px;
+}
+
+  header {
+    padding: 1rem 1%;
+    
+  }
+  .search-form {
+    order: 3;
+    width: 100%;
+    margin-top: 1rem;
+  }
+  
+  .search-container {
+    width: 100%;
+  }
+  
+  header input {
+    width: 100%;
+  }
+  
+  header input:focus {
+    width: 100%;
+  }
+  
+  .movie-card {
+    width: 140px;
+  }
+  
+  .details-info h1 {
+    font-size: 2rem;
+  }
+}
+
+h2 {
+  font-size: 1.5rem;
+  color: #b266ff;
+  text-shadow: 0 0 10px rgba(128, 0, 255, 0.5);
+}
+
+/* Grid 3 colunas para resultados de busca */
+.movies-grid-3x {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0;
+}
