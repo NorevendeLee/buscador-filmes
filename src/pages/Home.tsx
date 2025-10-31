@@ -1,10 +1,11 @@
 // src/pages/Home.tsx
 import type { MouseEvent } from "react";
-import { useState, useEffect, useRef} from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { searchMovies, getMovieDetails } from "../services/api";
 import { motion, AnimatePresence } from "framer-motion";
 import MovieCard from "../components/MovieCard";
+import { useFavorites } from "../contexts/FavoritesContext";
 
 export default function Home() {
   const [search, setSearch] = useState("");
@@ -12,7 +13,6 @@ export default function Home() {
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [favorites, setFavorites] = useState<string[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
   const [activeMovie, setActiveMovie] = useState<any | null>(null);
   const [modalDetails, setModalDetails] = useState<any | null>(null);
@@ -20,17 +20,7 @@ export default function Home() {
   const navigate = useNavigate();
 
   // favoritos do localStorage
-  const initialLoad = useRef(true);
-  useEffect(() => {
-    const saved = localStorage.getItem("favorites");
-    if (saved) setFavorites(JSON.parse(saved));
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("favorites", JSON.stringify(favorites));
-  }, [favorites]);
-
-  // Efeito para buscar detalhes quando um filme é selecionado para o modal
+  const { favorites, toggleFavorite } = useFavorites();
   useEffect(() => {
     if (activeMovie) {
       setModalLoading(true);
@@ -47,24 +37,30 @@ export default function Home() {
   }, [activeMovie]);
 
   // sugestões iniciais
+  const initialLoad = useRef(true);
   useEffect(() => {
     async function loadSuggestions() {
       setLoading(true);
       setError("");
       const suggestionsTitles = [
-        "Batman",
-        "Harry Potter",
-        "Avengers",
-        "Star Wars",
-        "Spider-Man",
-        "Frozen",
+        "Batman", "Harry Potter", "Avengers", "Star Wars", "Spider-Man", 
+        "Frozen", "Inception", "Interstellar", "Matrix", "Lord of the Rings", "Pulp Fiction"
       ];
       try {
         const allResults = await Promise.all(
           suggestionsTitles.map((title) => searchMovies(title))
         );
-        const merged = allResults.flat().slice(0, 6);
-        setSuggestions(merged);
+        const flattenedResults = allResults.flat();
+        // Filtra para garantir que não haja filmes duplicados
+        const uniqueSuggestions = [];
+        const seenIds = new Set();
+        for (const movie of flattenedResults) {
+          if (movie && movie.imdbID && !seenIds.has(movie.imdbID)) {
+            uniqueSuggestions.push(movie);
+            seenIds.add(movie.imdbID);
+          }
+        }
+        setSuggestions(uniqueSuggestions.slice(0, 10)); // Pega os 10 primeiros únicos
       } catch (err) {
         setError("Erro ao carregar sugestões");
       } finally {
@@ -85,11 +81,20 @@ export default function Home() {
     setHasSearched(true);
 
     const results = await searchMovies(search);
-    if (!results || results.length === 0) {
+    if (!results || results.length === 0) { // Se não houver resultados
       setError("Nenhum filme encontrado. Tente outro nome!");
       setMovies([]);
     } else {
-      setMovies(results);
+      // Filtra para garantir que os resultados da busca também sejam únicos
+      const uniqueSearchResults = [];
+      const seenIds = new Set();
+      for (const movie of results) {
+        if (movie && movie.imdbID && !seenIds.has(movie.imdbID)) {
+          uniqueSearchResults.push(movie);
+          seenIds.add(movie.imdbID);
+        }
+      }
+      setMovies(uniqueSearchResults);
     }
 
     setLoading(false);
@@ -99,12 +104,6 @@ export default function Home() {
 
   function handleWatch(id: string) {
     navigate(`/watch/${id}`);
-  }
-
-  function toggleFavorite(id: string) {
-    setFavorites((prev) =>
-      prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]
-    );
   }
 
   function handleGoHome() {
@@ -121,7 +120,11 @@ export default function Home() {
     <div className={`home-container ${activeMovie ? 'modal-open' : ''}`}>
       {/* Header */}
       <header className="home-header">
-        <h1 className="logo" onClick={handleGoHome}>🎬 RoxFlix</h1>
+        <h1 className="logo" onClick={handleGoHome}>RoxFlix</h1>
+        <nav className="nav-links">
+          <Link to="/">Início</Link>
+          <Link to="/favorites">Meus Favoritos</Link>
+        </nav>
         <form onSubmit={handleSearch} className="search-form">
           <input
             type="text"
@@ -148,15 +151,15 @@ export default function Home() {
 
         {!hasSearched && suggestions.length > 0 && (
           <>
-            <h2 style={{ marginBottom: 16 }}>✨ Sugestões para você</h2>
-            <div style={{ display: "flex", gap: 18, overflowX: "auto", paddingBottom: 24 }}>
+            <h2 style={{ marginBottom: 16, fontSize: '1.05rem' }}>Sugestões para você</h2>
+            <div className="suggestions-slider">
               {suggestions.map((movie) => (
                 <MovieCard
                   key={movie.imdbID}
                   movie={movie}
                   onClick={() => setActiveMovie(movie)}
-                  isFavorite={favorites.includes(movie.imdbID)}
-                  onToggleFavorite={() => toggleFavorite(movie.imdbID)}
+                  isFavorite={favorites.some(fav => fav.imdbID === movie.imdbID)}
+                  onToggleFavorite={() => toggleFavorite(movie)}
                   layoutId={movie.imdbID}
                 />
               ))}
@@ -167,14 +170,14 @@ export default function Home() {
         {hasSearched && movies.length > 0 && (
           <>
             <h2 style={{ marginBottom: 16 }}>🔍 Resultados da busca</h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, 240px)", gap: 18 }}>
+            <div className="movies-grid">
               {movies.map((movie) => (
                 <MovieCard
                   key={movie.imdbID}
                   movie={movie}
                   onClick={() => setActiveMovie(movie)}
-                  isFavorite={favorites.includes(movie.imdbID)}
-                  onToggleFavorite={() => toggleFavorite(movie.imdbID)}
+                  isFavorite={favorites.some(fav => fav.imdbID === movie.imdbID)}
+                  onToggleFavorite={() => toggleFavorite(movie)}
                   layoutId={movie.imdbID}
                 />
               ))}
@@ -233,12 +236,12 @@ export default function Home() {
                         <button
                           onClick={() => handleWatch(activeMovie.imdbID)}
                           className="btn-primary"
-                        >
+                        > 
                           ▶ Assistir Filme
                         </button>
 
                         <button
-                          onClick={() => toggleFavorite(activeMovie.imdbID)}
+                          onClick={() => toggleFavorite(activeMovie)}
                           className={`btn-secondary ${favorites.includes(activeMovie.imdbID) ? "active" : ""}`}
                         >
                           {favorites.includes(activeMovie.imdbID) ? "❤️ Remover dos favoritos" : "🤍 Adicionar aos favoritos"}

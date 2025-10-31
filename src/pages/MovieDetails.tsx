@@ -2,35 +2,24 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getMovieDetails } from "../services/api";
+import { useFavorites } from "../contexts/FavoritesContext";
 
 export default function MovieDetails() {
   const { id } = useParams<{ id: string }>();
   const [movie, setMovie] = useState<any>(null);
-  const [favorites, setFavorites] = useState<string[]>([]);
+  const { favorites, toggleFavorite } = useFavorites();
 
   useEffect(() => {
-    const saved = localStorage.getItem("favorites");
-    if (saved) setFavorites(JSON.parse(saved));
-
     if (id) {
       getMovieDetails(id).then((data) => setMovie(data));
     }
   }, [id]);
 
-  function toggleFavorite() {
-    if (!id) return;
-    const updated = favorites.includes(id)
-      ? favorites.filter((f) => f !== id)
-      : [...favorites, id];
-    setFavorites(updated);
-    localStorage.setItem("favorites", JSON.stringify(updated));
-  }
-
   if (!movie) {
     return <p style={{ padding: "20px" }}>Carregando detalhes...</p>;
   }
 
-  const isFav = favorites.includes(movie.imdbID);
+  const isFav = favorites.some(fav => fav.imdbID === movie.imdbID);
 
   return (
     <div className="details">
@@ -54,7 +43,7 @@ export default function MovieDetails() {
 
           <button
             className={`fav-btn ${isFav ? "fav" : ""}`}
-            onClick={toggleFavorite}
+            onClick={() => toggleFavorite(movie)}
           >
             {isFav ? "❤️ Remover dos favoritos" : "🤍 Adicionar aos favoritos"}
           </button>
