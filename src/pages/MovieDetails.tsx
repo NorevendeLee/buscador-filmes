@@ -34,7 +34,7 @@ export default function MovieDetails() {
 
   return (
     <div className="details">
-      <Link to="/" className="back">⬅ Voltar</Link>
+      <Link to="/" className="back-btn">⬅ Voltar</Link>
       <div className="details-content">
         <img
           src={

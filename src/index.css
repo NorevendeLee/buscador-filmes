@@ -59,7 +59,7 @@ header.scrolled {
 }
 
 .nav-links a {
-  color: var(--netfox-text);
+  color: var(--netflix-text);
   text-decoration: none;
   font-size: 0.9rem;
   font-weight: 500;
@@ -158,13 +158,13 @@ header button:hover {
 .movies-grid {
   display: flex;
   flex-wrap: wrap;           /* 🔹 Faz os cards quebrarem linha automaticamente */
-  justify-content: center;   /* 🔹 Centraliza os cards */
-  gap: 2px;                 /* 🔹 Espaço entre eles */
-  padding: 20px;
+  justify-content: flex-start; /* 🔹 Alinha os cards à esquerda */
+  gap: 18px;                 /* 🔹 Espaço entre eles */
+  padding: 0;
 }
 
 .movies-grid::-webkit-scrollbar {
-  display: none;
+  height: 8px;
 }
 
 /* Card do filme aprimorado */
@@ -175,14 +175,10 @@ header button:hover {
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   cursor: pointer;
-  /*flex: 0 0 auto;*/
-  width: 300px;
+  flex: 0 0 240px; /* Garante que o card não encolha */
+  width: 240px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-
-  width: 300px;
-  height: 480px;
-  /*flex: 1 1 200px;   /* 🔹 Faz o card se ajustar mantendo largura mínima */
-  max-width: 300px;
+  height: auto;
 }
 
 .movie-card:hover {
@@ -213,7 +209,7 @@ header button:hover {
 /* Pôster com overlay */
 .movie-card img {
   width: 100%;
-  height: 400px;
+  height: 340px;
   object-fit: cover;
   transition: transform 0.3s ease;
 }
@@ -239,8 +235,8 @@ header button:hover {
 }
 
 .movie-card h3 {
-  padding: 5px 15px 0 15px;
-  font-size: 0.85rem;
+  padding: 0;
+  font-size: 1rem;
   margin: 0 0 0.5rem 0;
   color: #fff;
   font-weight: 500;
@@ -248,8 +244,7 @@ header button:hover {
 }
 
 .movie-card p {
-  padding-left: 15px;
-  padding-bottom: 15px;
+  padding: 0;
   font-size: 0.8rem;
   color: var(--netflix-text-secondary);
   margin: 0;
@@ -547,4 +542,129 @@ h2 {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 0;
+}
+
+/* Estilos para o Modal de Detalhes Rápidos */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+}
+
+.modal-content {
+  width: 90%;
+  max-width: 900px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #141414;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75);
+  color: #fff;
+  position: relative;
+}
+
+.modal-grid {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 0;
+}
+
+.modal-poster {
+  width: 300px;
+  height: 450px;
+  object-fit: cover;
+  display: block;
+}
+
+.modal-info {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-info h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2.2rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.modal-info .meta {
+  color: #a0a0a0;
+  margin: 0 0 1.5rem;
+  font-size: 0.9rem;
+}
+
+.modal-info .plot {
+  color: #d4d4d4;
+  font-size: 1rem;
+  line-height: 1.6;
+  flex-grow: 1; /* Empurra os botões para baixo */
+}
+
+.modal-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.modal-actions .btn-primary,
+.modal-actions .btn-secondary {
+  padding: 12px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.modal-actions .btn-primary {
+  background: var(--netflix-red);
+  color: #fff;
+}
+
+.modal-actions .btn-primary:hover {
+  filter: brightness(1.2);
+}
+
+.modal-actions .btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.modal-actions .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.modal-actions .btn-secondary.active {
+  background: var(--netflix-red);
+  border-color: var(--netflix-red);
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: background 0.2s ease;
+}
+
+.modal-close-btn:hover {
+  background: rgba(0, 0, 0, 0.8);
 }
