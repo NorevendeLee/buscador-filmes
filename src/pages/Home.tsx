@@ -1,8 +1,8 @@
 // src/pages/Home.tsx
 import type { MouseEvent } from "react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef} from "react";
 import { useNavigate } from "react-router-dom";
-import { searchMovies } from "../services/api";
+import { searchMovies, getMovieDetails } from "../services/api";
 import { motion, AnimatePresence } from "framer-motion";
 import MovieCard from "../components/MovieCard";
 
@@ -15,6 +15,8 @@ export default function Home() {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
   const [activeMovie, setActiveMovie] = useState<any | null>(null);
+  const [modalDetails, setModalDetails] = useState<any | null>(null);
+  const [modalLoading, setModalLoading] = useState(false);
   const navigate = useNavigate();
 
   // favoritos do localStorage
@@ -27,6 +29,22 @@ export default function Home() {
   useEffect(() => {
     localStorage.setItem("favorites", JSON.stringify(favorites));
   }, [favorites]);
+
+  // Efeito para buscar detalhes quando um filme é selecionado para o modal
+  useEffect(() => {
+    if (activeMovie) {
+      setModalLoading(true);
+      setModalDetails(null); // Limpa detalhes anteriores
+      getMovieDetails(activeMovie.imdbID)
+        .then((details) => {
+          setModalDetails(details);
+        })
+        .catch(() => {
+          setError("Não foi possível carregar os detalhes do filme.");
+        })
+        .finally(() => setModalLoading(false));
+    }
+  }, [activeMovie]);
 
   // sugestões iniciais
   useEffect(() => {
@@ -77,8 +95,10 @@ export default function Home() {
     setLoading(false);
   }
 
-  function handleDetails(id: string) {
-    navigate(`/movie/${id}`);
+
+
+  function handleWatch(id: string) {
+    navigate(`/watch/${id}`);
   }
 
   function toggleFavorite(id: string) {
@@ -94,35 +114,37 @@ export default function Home() {
     setError("");
   }
 
+  // Define qual filme será usado no fundo: o ativo (modal) ou o primeiro da sugestão.
+  const backgroundMovie = activeMovie || (suggestions.length > 0 ? suggestions[0] : null);
+
   return (
-    <div style={{ position: "relative", minHeight: "100vh", background: "#000", color: "#fff" }}>
+    <div className={`home-container ${activeMovie ? 'modal-open' : ''}`}>
       {/* Header */}
-      <header style={{ position: "absolute", zIndex: 20, width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 40px", background: "linear-gradient(180deg, rgba(0,0,0,0.7), transparent)" }}>
-        <h1 style={{ margin: 0, cursor: "pointer" }} onClick={handleGoHome}>🎬 RoxFlix</h1>
-        <form onSubmit={handleSearch} style={{ display: "flex", gap: 8 }}>
+      <header className="home-header">
+        <h1 className="logo" onClick={handleGoHome}>🎬 RoxFlix</h1>
+        <form onSubmit={handleSearch} className="search-form">
           <input
             type="text"
             placeholder="Buscar filme..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{ padding: "8px 12px", borderRadius: 6, border: "1px solid #444", background: "rgba(255,255,255,0.04)", color: "#fff" }}
           />
-          <button type="submit" style={{ padding: "8px 12px", borderRadius: 6, background: "#e11", color: "#fff", border: "none" }}>Buscar</button>
+          <button type="submit">Buscar</button>
         </form>
       </header>
 
       {/* Background de destaque (se houver ativo, mostra a imagem como fundo) */}
-      <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
-        {activeMovie ? (
-          <img src={activeMovie?.Poster !== "N/A" ? activeMovie.Poster : ""} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.35, filter: "blur(4px) contrast(0.9)" }} />
+      <div className="backdrop-container">
+        {backgroundMovie ? (
+          <img src={backgroundMovie.Poster !== "N/A" ? backgroundMovie.Poster : ""} alt="" className="backdrop-image" />
         ) : (
-          <div style={{ width: "100%", height: "100%", background: "linear-gradient(90deg,#111 0%, #000 50%, #111 100%)" }} />
+          <div className="backdrop-placeholder" />
         )}
       </div>
 
-      <main style={{ position: "relative", zIndex: 10, padding: "120px 40px 40px" }}>
-        {loading && <div style={{ color: "#fff" }}>Carregando...</div>}
-        {error && <p style={{ color: "#f88" }}>{error}</p>}
+      <main className="home-main">
+        {loading && <div className="loader"></div>}
+        {error && <p className="error-message">{error}</p>}
 
         {!hasSearched && suggestions.length > 0 && (
           <>
@@ -179,50 +201,59 @@ export default function Home() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <div
+            <motion.div
               onClick={(e: MouseEvent) => e.stopPropagation()}
-              style={{
-                width: "90%",
-                maxWidth: 1000,
-                borderRadius: 14,
-                overflow: "hidden",
-                background: "rgba(10,10,10,0.9)",
-                boxShadow: "0 20px 60px rgba(0,0,0,0.7)",
-                position: "relative",
-                color: "#fff",
-              }}
+              className="modal-content"
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 50, opacity: 0 }}
             >
-              <img
-                src={activeMovie.Poster !== "N/A" ? activeMovie.Poster : "https://via.placeholder.com/800x1200?text=Sem+Imagem"}
-                alt={activeMovie.Title}
-                style={{ width: "100%", height: 520, objectFit: "cover", display: "block" }}
-              />
+              <div className="modal-grid">
+                <img
+                  src={activeMovie.Poster !== "N/A" ? activeMovie.Poster : "https://via.placeholder.com/400x600?text=Sem+Imagem"}
+                  alt={activeMovie.Title}
+                  className="modal-poster"
+                />
+                <div className="modal-info">                  
+                  {modalLoading ? (
+                    <div className="loader-container"><div className="loader"></div></div>
+                  ) : (
+                    <>
+                      <h1>{modalDetails?.Title || activeMovie.Title}</h1>
+                      <p className="meta">{modalDetails?.Year} • {modalDetails?.Rated} • {modalDetails?.Runtime}</p>
+                      <p className="plot">{modalDetails?.Plot || "Enredo não disponível."}</p>
 
-              <div style={{ padding: 24 }}>
-                <h1 style={{ margin: 0 }}>{activeMovie.Title}</h1>
-                <p style={{ marginTop: 8, color: "#bbb" }}>{activeMovie.Year} • {activeMovie.Type}</p>
+                      <div className="details-list">
+                        <p><strong>Gênero:</strong> {modalDetails?.Genre}</p>
+                        <p><strong>Atores:</strong> {modalDetails?.Actors}</p>
+                        <p><strong>Diretor:</strong> {modalDetails?.Director}</p>
+                      </div>
 
-                <div style={{ marginTop: 16, display: "flex", gap: 12 }}>
+                      <div className="modal-actions">
+                        <button
+                          onClick={() => handleWatch(activeMovie.imdbID)}
+                          className="btn-primary"
+                        >
+                          ▶ Assistir Filme
+                        </button>
+
+                        <button
+                          onClick={() => toggleFavorite(activeMovie.imdbID)}
+                          className={`btn-secondary ${favorites.includes(activeMovie.imdbID) ? "active" : ""}`}
+                        >
+                          {favorites.includes(activeMovie.imdbID) ? "❤️ Remover dos favoritos" : "🤍 Adicionar aos favoritos"}
+                        </button>
+                      </div>
+                    </>
+                  )}
+
                   <button
-                    onClick={() => handleDetails(activeMovie.imdbID)}
-                    style={{ padding: "10px 16px", borderRadius: 8, background: "#e11", color: "#fff", border: "none", cursor: "pointer" }}
-                  >
-                    Ver detalhes
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      toggleFavorite(activeMovie.imdbID);
-                    }}
-                    style={{ padding: "10px 16px", borderRadius: 8, background: "transparent", border: "1px solid #444", color: "#fff", cursor: "pointer" }}
-                  >
-                    {favorites.includes(activeMovie.imdbID) ? "Remover favorito" : "Adicionar aos favoritos"}
-                  </button>
+                    onClick={() => setActiveMovie(null)}
+                    className="modal-close-btn"
+                  >✕</button>
                 </div>
-
-                <p style={{ marginTop: 18, color: "#ccc" }}>{activeMovie.Plot || ""}</p>
               </div>
-            </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
